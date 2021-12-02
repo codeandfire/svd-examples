@@ -281,13 +281,11 @@ impl TextExample {
         })
         .abs() as f32;
 
-        // size in pixels of x- and y-dimensions
         const BASE_SIZE: u32 = 400;
         const PADDING: u32 = 50;
 
+        // size in pixels of x- and y-dimensions
         let mut x_size = BASE_SIZE;
-
-        // adjusting size of y-dimension to maintain aspect ratio
         let mut y_size = (x_size as f64 + ((y_lim / x_lim) as f64 - 1.0) * x_size as f64) as u32;
 
         // setting up coordinate system
