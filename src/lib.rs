@@ -41,7 +41,11 @@ impl TextExample {
         // map tokens from words to indices in the vocab
         let mut vocab_to_idx: HashMap<&str, usize> = HashMap::new();
         vocab.iter().enumerate().for_each(|(i, v)| {
-            vocab_to_idx.insert(v, i).unwrap();
+            // unwrap_or_default here is just for namesake handling
+            // of this insert call, which will always return None but the
+            // program is not supposed to panic because None is the right
+            // value in this case.
+            vocab_to_idx.insert(v, i).unwrap_or_default();
         });
 
         // prepare the count matrix
@@ -73,13 +77,8 @@ impl TextExample {
         });
         count_matrix = count_matrix.select(Axis(0), &idxs);
 
-        // normalize the count matrix by the number of tokens occurring in
-        // each document.
-        let count_matrix = count_matrix.mapv(|c| c as f64)
-            / &count_matrix
-                .sum_axis(Axis(0))
-                .insert_axis(Axis(0))
-                .mapv(|c| c as f64);
+        // convert the count matrix from type usize to type f64
+        let count_matrix = count_matrix.mapv(|v| v as f64);
 
         // take SVD
         let (u_matr, sing, vt_matr) =
@@ -88,10 +87,19 @@ impl TextExample {
                 .expect("Failed to take SVD.")
                 .values_vectors();
 
-        // get term and document vectors
+        // get term and document vectors.
+        // also normalize them.
         let sing: Array<f64, Ix2> = Array::from_diag(&sing);
-        let term_vecs = u_matr.dot(&sing);
-        let doc_vecs = sing.dot(&vt_matr).reversed_axes();
+        let normalize_vecs = |vecs: Array<f64, Ix2>| {
+            &vecs
+                / &vecs
+                    .mapv(|v| v.powi(2))
+                    .sum_axis(Axis(1))
+                    .mapv(f64::sqrt)
+                    .insert_axis(Axis(1))
+        };
+        let term_vecs = normalize_vecs(u_matr.dot(&sing));
+        let doc_vecs = normalize_vecs(sing.dot(&vt_matr).reversed_axes());
 
         TextExample {
             docs,
@@ -105,12 +113,7 @@ impl TextExample {
 
     fn display_docs(&self) {
         // maximum length of document labels
-        let maxlen = self
-            .doc_labels
-            .iter()
-            .map(|l| l.len())
-            .max()
-            .unwrap();
+        let maxlen = self.doc_labels.iter().map(|l| l.len()).max().unwrap();
 
         for (label, doc) in self.doc_labels.iter().zip(self.docs) {
             println!("{:w$}: {}", label, doc, w = maxlen);
@@ -152,11 +155,7 @@ impl TextExample {
 
     fn display_vecs(vecs: &Array<f64, Ix2>, labels: &[&str]) {
         // maximum length of the labels
-        let maxlen = labels
-            .iter()
-            .map(|l| l.len())
-            .max()
-            .unwrap();
+        let maxlen = labels.iter().map(|l| l.len()).max().unwrap();
 
         // formatting width
         let width = if maxlen > 7 { maxlen } else { 7 };
@@ -178,11 +177,7 @@ impl TextExample {
         let sim_matrix = norm_vecs.dot(&norm_vecs.t());
 
         // maximum length of the labels
-        let maxlen = labels
-            .iter()
-            .map(|l| l.len())
-            .max()
-            .unwrap();
+        let maxlen = labels.iter().map(|l| l.len()).max().unwrap();
 
         // formatting width
         let width = if maxlen > 7 { maxlen } else { 7 };
