@@ -259,20 +259,24 @@ impl TextExample {
         let (x_lim, y_lim) = (find_dim_lim(0), find_dim_lim(1));
 
         const BASE_SIZE: u32 = 400;
+
+        // padding to account for any text spillovers
         const PADDING: u32 = 50;
 
         // size in pixels of x- and y-dimensions
         let mut x_size = BASE_SIZE;
         let mut y_size = (x_size as f64 + ((y_lim / x_lim) as f64 - 1.0) * x_size as f64) as u32;
 
-        // setting up coordinate system
+        // coordinate system
         let coord: Cartesian2d<RangedCoordf32, RangedCoordf32> = Cartesian2d::new(
             -x_lim..x_lim,
             -y_lim..y_lim,
-            (0..x_size as i32, 0..y_size as i32),
+            (
+                PADDING as i32 / 2..(x_size as i32 - PADDING as i32 / 2),
+                PADDING as i32 / 2..(y_size as i32 - PADDING as i32 / 2),
+            ),
         );
 
-        // adding padding to account for any text spillovers
         x_size += PADDING;
         y_size += PADDING;
 
