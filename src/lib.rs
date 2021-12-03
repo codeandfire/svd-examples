@@ -14,7 +14,7 @@ pub struct LSAExample {
 }
 
 impl LSAExample {
-    pub fn setup(k: usize) -> LSAExample {
+    pub fn setup(dim_k: usize) -> LSAExample {
         let docs = [
             "human machine interface for lab ABC computer applications",
             "a survey of user opinion of computer system response time",
@@ -83,7 +83,7 @@ impl LSAExample {
         // take SVD
         let (u_matr, sing, vt_matr) =
             TruncatedSvd::new(count_matrix.clone(), TruncatedOrder::Largest)
-                .decompose(k)
+                .decompose(dim_k)
                 .expect("Failed to take SVD.")
                 .values_vectors();
 
