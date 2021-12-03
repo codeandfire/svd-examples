@@ -14,7 +14,7 @@ pub struct TextExample {
 }
 
 impl TextExample {
-    pub fn setup(dim: usize) -> TextExample {
+    pub fn setup(k: usize) -> TextExample {
         let docs = [
             "human machine interface for lab ABC computer applications",
             "a survey of user opinion of computer system response time",
@@ -83,7 +83,7 @@ impl TextExample {
         // take SVD
         let (u_matr, sing, vt_matr) =
             TruncatedSvd::new(count_matrix.clone(), TruncatedOrder::Largest)
-                .decompose(dim)
+                .decompose(k)
                 .expect("Failed to take SVD.")
                 .values_vectors();
 
