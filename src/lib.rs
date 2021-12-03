@@ -4,7 +4,7 @@ use plotters::coord::types::RangedCoordf32;
 use plotters::prelude::*;
 use std::collections::{HashMap, HashSet};
 
-pub struct TextExample {
+pub struct LSAExample {
     docs: [&'static str; 9],
     doc_labels: [&'static str; 9],
     vocab: Vec<&'static str>,
@@ -13,8 +13,8 @@ pub struct TextExample {
     term_vecs: Array<f64, Ix2>,
 }
 
-impl TextExample {
-    pub fn setup(k: usize) -> TextExample {
+impl LSAExample {
+    pub fn setup(k: usize) -> LSAExample {
         let docs = [
             "human machine interface for lab ABC computer applications",
             "a survey of user opinion of computer system response time",
@@ -101,7 +101,7 @@ impl TextExample {
         let term_vecs = normalize_vecs(u_matr.dot(&sing));
         let doc_vecs = normalize_vecs(sing.dot(&vt_matr).reversed_axes());
 
-        TextExample {
+        LSAExample {
             docs,
             doc_labels,
             vocab,
@@ -206,10 +206,10 @@ impl TextExample {
         match key {
             "docs" => self.display_docs(),
             "count_matrix" => self.display_count_matrix(),
-            "term_vecs" => TextExample::display_vecs(&self.term_vecs, &self.vocab),
-            "doc_vecs" => TextExample::display_vecs(&self.doc_vecs, &self.doc_labels),
-            "term_sim" => TextExample::display_sim_matrix(&self.term_vecs, &self.vocab),
-            "doc_sim" => TextExample::display_sim_matrix(&self.doc_vecs, &self.doc_labels),
+            "term_vecs" => LSAExample::display_vecs(&self.term_vecs, &self.vocab),
+            "doc_vecs" => LSAExample::display_vecs(&self.doc_vecs, &self.doc_labels),
+            "term_sim" => LSAExample::display_sim_matrix(&self.term_vecs, &self.vocab),
+            "doc_sim" => LSAExample::display_sim_matrix(&self.doc_vecs, &self.doc_labels),
             _ => {
                 return Err(format!(
                     "Invalid key '{}'! Key must be one of 'docs', 'count_matrix', \
