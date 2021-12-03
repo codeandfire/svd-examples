@@ -40,23 +40,18 @@ impl TextExample {
 
         // map tokens from words to indices in the vocab
         let mut vocab_to_idx: HashMap<&str, usize> = HashMap::new();
-
-        for (i, v) in vocab.iter().enumerate() {
-            vocab_to_idx.insert(v, i);
-        }
+        vocab.iter().enumerate().for_each(|(i, v)| {
+            vocab_to_idx.insert(v, i).unwrap();
+        });
 
         // prepare the count matrix
         let mut count_matrix: Array<usize, Ix2> = Array::zeros((vocab.len(), docs.len()));
 
         for (d, doc) in docs.iter().enumerate() {
             for token in doc.split_whitespace() {
-                let i = *match vocab_to_idx.get(token) {
-                    None => panic!("token not in vocab!"),
-                    Some(i) => i,
-                };
-
-                let val = count_matrix[[i, d]];
-                count_matrix.slice_mut(s![i, d]).fill(val + 1_usize);
+                let i = *vocab_to_idx.get(token).unwrap();
+                let elem = count_matrix.get_mut((i, d)).unwrap();
+                *elem += 1_usize;
             }
         }
 
@@ -72,11 +67,10 @@ impl TextExample {
         // update the vocabulary and count matrix accordingly
         let mut vocab = Vec::new();
         let mut idxs = Vec::new();
-
-        for (v, i) in vocab_to_idx.into_iter() {
+        vocab_to_idx.into_iter().for_each(|(v, i)| {
             vocab.push(v);
             idxs.push(i);
-        }
+        });
         count_matrix = count_matrix.select(Axis(0), &idxs);
 
         // normalize the count matrix by the number of tokens occurring in
@@ -111,11 +105,12 @@ impl TextExample {
 
     fn display_docs(&self) {
         // maximum length of document labels
-        let maxlen = match self.doc_labels.iter().max_by_key(|l| l.len()) {
-            None => panic!("Cannot find maximum."),
-            Some(i) => i,
-        }
-        .len();
+        let maxlen = self
+            .doc_labels
+            .iter()
+            .map(|l| l.len())
+            .max()
+            .unwrap();
 
         for (label, doc) in self.doc_labels.iter().zip(self.docs) {
             println!("{:w$}: {}", label, doc, w = maxlen);
@@ -123,18 +118,14 @@ impl TextExample {
     }
 
     fn display_count_matrix(&self) {
-        // all labels involved - document labels and term names
-        let mut all_labels = Vec::from(self.doc_labels);
-        for v in self.vocab.iter() {
-            all_labels.push(v);
-        }
-
         // maximum length of labels
-        let maxlen = match all_labels.into_iter().max_by_key(|l| l.len()) {
-            None => panic!("Cannot find maximum."),
-            Some(i) => i,
-        }
-        .len();
+        let maxlen = self
+            .doc_labels
+            .iter()
+            .chain(self.vocab.iter())
+            .map(|l| l.len())
+            .max()
+            .unwrap();
 
         // formatting width
         let width = if maxlen > 4 { maxlen } else { 4 };
@@ -161,11 +152,11 @@ impl TextExample {
 
     fn display_vecs(vecs: &Array<f64, Ix2>, labels: &[&str]) {
         // maximum length of the labels
-        let maxlen = match labels.iter().max_by_key(|l| l.len()) {
-            None => panic!("Cannot find maximum."),
-            Some(i) => i,
-        }
-        .len();
+        let maxlen = labels
+            .iter()
+            .map(|l| l.len())
+            .max()
+            .unwrap();
 
         // formatting width
         let width = if maxlen > 7 { maxlen } else { 7 };
@@ -182,15 +173,16 @@ impl TextExample {
             .sum_axis(Axis(1))
             .mapv(f64::sqrt)
             .insert_axis(Axis(1));
+
         let norm_vecs = vecs / &norm_vals;
         let sim_matrix = norm_vecs.dot(&norm_vecs.t());
 
         // maximum length of the labels
-        let maxlen = match labels.iter().max_by_key(|l| l.len()) {
-            None => panic!("Failed to find maximum."),
-            Some(i) => i,
-        }
-        .len();
+        let maxlen = labels
+            .iter()
+            .map(|l| l.len())
+            .max()
+            .unwrap();
 
         // formatting width
         let width = if maxlen > 7 { maxlen } else { 7 };
@@ -260,26 +252,16 @@ impl TextExample {
 
         let filename = format!("{}_plot.svg", key);
 
-        // limits of x- and y-axes
-        let x_lim = (*match vecs.slice(s![.., 0]).iter().max_by(|a, b| {
-            a.abs()
-                .partial_cmp(&b.abs())
-                .expect("Failed to compare f64 values.")
-        }) {
-            None => panic!("Failed to find maximum."),
-            Some(i) => i,
-        })
-        .abs() as f32;
+        // limits of x- and y-dimensions
+        let find_dim_lim = |d| {
+            vecs.slice(s![.., d])
+                .iter()
+                .map(|v| v.abs() as f32)
+                .reduce(f32::max)
+                .unwrap()
+        };
 
-        let y_lim = (*match vecs.slice(s![.., 1]).iter().max_by(|a, b| {
-            a.abs()
-                .partial_cmp(&b.abs())
-                .expect("Failed to compare f64 values.")
-        }) {
-            None => panic!("Failed to find maximum."),
-            Some(i) => i,
-        })
-        .abs() as f32;
+        let (x_lim, y_lim) = (find_dim_lim(0), find_dim_lim(1));
 
         const BASE_SIZE: u32 = 400;
         const PADDING: u32 = 50;
