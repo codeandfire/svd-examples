@@ -131,7 +131,7 @@ impl LSAExample {
             .unwrap();
 
         // formatting width
-        let width = if maxlen > 4 { maxlen } else { 4 };
+        let width = maxlen;
 
         for _ in 0..width + 1 {
             print!(" ");
@@ -146,7 +146,7 @@ impl LSAExample {
             print!("{:w$} ", label, w = width);
 
             for i in 0..self.vocab.len() {
-                print!("{:w$.2} ", self.count_matrix[[i, d]], w = width);
+                print!("{:w$.0} ", self.count_matrix[[i, d]], w = width);
             }
 
             println!();
@@ -239,10 +239,7 @@ impl LSAExample {
 
         let dim = vecs.len_of(Axis(1));
         if dim != 2 {
-            return Err(format!(
-                "Vectors are of dimension {}! They need to be 2-dimensional to plot!",
-                dim
-            ));
+            return Err("Cannot plot vectors with dimension not equal to 2.".to_string());
         }
 
         let filename = format!("{}_plot.svg", key);
@@ -299,6 +296,8 @@ impl LSAExample {
             root.draw(&dot_and_label(x, y, label))
                 .expect("Failed to draw on figure.");
         }
+
+        println!("Plot saved to {}", filename);
 
         Ok(())
     }
