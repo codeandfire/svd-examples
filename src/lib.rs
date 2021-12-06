@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 use std::ops::Range;
 use std::path::Path;
 
-pub struct LSAExample {
+pub struct LsaExample {
     docs: [&'static str; 9],
     doc_labels: [&'static str; 9],
     vocab: Vec<&'static str>,
@@ -18,8 +18,8 @@ pub struct LSAExample {
     term_vecs: Array<f64, Ix2>,
 }
 
-impl LSAExample {
-    pub fn setup(dim_k: usize) -> LSAExample {
+impl LsaExample {
+    pub fn setup(dim_k: usize) -> LsaExample {
         let docs = [
             "human machine interface for lab ABC computer applications",
             "a survey of user opinion of computer system response time",
@@ -106,7 +106,7 @@ impl LSAExample {
         let term_vecs = normalize_vecs(u_matr.dot(&sing));
         let doc_vecs = normalize_vecs(sing.dot(&vt_matr).reversed_axes());
 
-        LSAExample {
+        LsaExample {
             docs,
             doc_labels,
             vocab,
@@ -211,10 +211,10 @@ impl LSAExample {
         match key {
             "docs" => self.display_docs(),
             "count_matrix" => self.display_count_matrix(),
-            "term_vecs" => LSAExample::display_vecs(&self.term_vecs, &self.vocab),
-            "doc_vecs" => LSAExample::display_vecs(&self.doc_vecs, &self.doc_labels),
-            "term_sim" => LSAExample::display_sim_matrix(&self.term_vecs, &self.vocab),
-            "doc_sim" => LSAExample::display_sim_matrix(&self.doc_vecs, &self.doc_labels),
+            "term_vecs" => LsaExample::display_vecs(&self.term_vecs, &self.vocab),
+            "doc_vecs" => LsaExample::display_vecs(&self.doc_vecs, &self.doc_labels),
+            "term_sim" => LsaExample::display_sim_matrix(&self.term_vecs, &self.vocab),
+            "doc_sim" => LsaExample::display_sim_matrix(&self.doc_vecs, &self.doc_labels),
             _ => {
                 return Err(format!(
                     "Invalid key '{}'! Key must be one of 'docs', 'count_matrix', \

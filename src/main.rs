@@ -1,5 +1,5 @@
 use clap::Parser;
-use svd_examples::LSAExample;
+use svd_examples::LsaExample;
 
 #[derive(Parser)]
 #[clap(about = "Examples of the SVD.")]
@@ -10,12 +10,12 @@ struct Opts {
 
 #[derive(Parser)]
 enum SubCommand {
-    LSA(LSAOpts),
+    Lsa(LsaOpts),
 }
 
 #[derive(Parser)]
 #[clap(about = "Latent Semantic Analysis (LSA) example from Deerwester et. al. (1990)")]
-struct LSAOpts {
+struct LsaOpts {
     #[clap(
         short = 'k',
         long,
@@ -41,8 +41,8 @@ fn main() {
     let opts = Opts::parse();
 
     match opts.subcmd {
-        SubCommand::LSA(lsa_opts) => {
-            let lsa_example = LSAExample::setup(lsa_opts.dim_k);
+        SubCommand::Lsa(lsa_opts) => {
+            let lsa_example = LsaExample::setup(lsa_opts.dim_k);
 
             if lsa_opts.disp_docs {
                 println!("Nine documents:");
