@@ -3,6 +3,7 @@ use ndarray_linalg::*;
 use plotters::coord::types::RangedCoordf32;
 use plotters::prelude::*;
 use std::collections::{HashMap, HashSet};
+use std::path::Path;
 
 pub struct LSAExample {
     docs: [&'static str; 9],
@@ -222,7 +223,7 @@ impl LSAExample {
         Ok(())
     }
 
-    pub fn plot(&self, key: &str) -> Result<(), String> {
+    pub fn plot(&self, key: &str, filename: &str) -> Result<(), String> {
         // vec to store doc_labels which is an array
         let doc_labels = Vec::from(self.doc_labels);
 
@@ -242,7 +243,23 @@ impl LSAExample {
             return Err("Cannot plot vectors with dimension not equal to 2.".to_string());
         }
 
-        let filename = format!("{}_plot.svg", key);
+        match Path::new(filename).extension() {
+            None => {
+                return Err(format!(
+                    "Filename {} is invalid. Use a filename like filename.svg",
+                    filename
+                ));
+            }
+            Some(ext) => match ext.to_str().unwrap() {
+                "svg" => {}
+                _ => {
+                    return Err(format!(
+                        "Filename {} does not have a .svg extension",
+                        filename
+                    ));
+                }
+            },
+        };
 
         // limits of x- and y-dimensions
         let find_dim_lim = |d| {

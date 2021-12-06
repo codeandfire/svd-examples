@@ -70,16 +70,20 @@ fn main() {
 
             println!("Document vectors:");
             lsa_example.display("doc_vecs").unwrap();
-            lsa_example.plot("doc_vecs").unwrap_or_else(|error| {
-                println!("Skipping plot: {}", error);
-            });
+            lsa_example
+                .plot("doc_vecs", "doc_vecs_plot.svg")
+                .unwrap_or_else(|error| {
+                    println!("Skipping plot: {}", error);
+                });
             println!();
 
             println!("Term vectors:");
             lsa_example.display("term_vecs").unwrap();
-            lsa_example.plot("term_vecs").unwrap_or_else(|error| {
-                println!("Skipping plot: {}", error);
-            });
+            lsa_example
+                .plot("term_vecs", "term_vecs_plot.svg")
+                .unwrap_or_else(|error| {
+                    println!("Skipping plot: {}", error);
+                });
             println!();
         }
     }
