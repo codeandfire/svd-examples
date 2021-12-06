@@ -1,8 +1,12 @@
+use image::error::ImageError;
+use image::io::Reader as ImageReader;
+use image::{GrayImage, ImageBuffer};
 use ndarray::prelude::*;
 use ndarray_linalg::*;
 use plotters::coord::types::RangedCoordf32;
 use plotters::prelude::*;
 use std::collections::{HashMap, HashSet};
+use std::ops::Range;
 use std::path::Path;
 
 pub struct LSAExample {
@@ -318,4 +322,38 @@ impl LSAExample {
 
         Ok(())
     }
+}
+
+pub fn image_example(
+    filename: &str,
+    range_k: Range<usize>,
+    step_k: usize,
+) -> Result<(), ImageError> {
+    let img = ImageReader::open(filename)?.decode()?.into_luma8();
+    let (w, h) = (img.width() as usize, img.height() as usize);
+
+    let img = Array::from_shape_vec((h, w), img.into_vec())
+        .unwrap()
+        .mapv(|v| v as f64);
+
+    print!("Figures saved to ");
+
+    for k in range_k.step_by(step_k) {
+        let (u_matr, sing, vt_matr) = TruncatedSvd::new(img.clone(), TruncatedOrder::Largest)
+            .decompose(k)
+            .expect("Failed to take SVD.")
+            .values_vectors();
+        let sing = Array::from_diag(&sing);
+
+        let trunc = u_matr.dot(&sing).dot(&vt_matr).mapv(|v| v as u8);
+        let trunc: GrayImage =
+            ImageBuffer::from_vec(w as u32, h as u32, trunc.into_raw_vec()).unwrap();
+
+        let filename = format!("k_{}.png", k);
+        trunc.save(&filename).expect("Failed to save image.");
+        print!("{} ", &filename);
+    }
+    println!();
+
+    Ok(())
 }
