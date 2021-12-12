@@ -4,7 +4,7 @@ use ndarray_linalg::{TruncatedOrder, TruncatedSvd};
 use std::ops::Deref;
 
 /// Take SVD of a matrix, yielding three matrices: U, S and V^T.
-trait TakeSvd {
+pub trait TakeSvd {
     fn take_svd(&self, k: usize) -> (Array<f64, Ix2>, Array<f64, Ix2>, Array<f64, Ix2>);
 }
 
@@ -26,7 +26,7 @@ impl TakeSvd for Array<f64, Ix2> {
 
 /// Array containing grayscale pixel values of an image.
 #[derive(Debug, PartialEq)]
-pub struct GrayPixelArray(Array<u8, Ix2>);
+pub struct GrayPixelArray(pub Array<u8, Ix2>);
 
 impl Deref for GrayPixelArray {
     type Target = Array<u8, Ix2>;
