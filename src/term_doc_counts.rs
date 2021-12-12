@@ -11,7 +11,7 @@ pub struct TermDocCounts {
 
 impl TermDocCounts {
     /// Obtain a term-document count matrix from a vector of strings (documents).
-    fn from_documents(documents: &[String]) -> Self {
+    pub fn from_documents(documents: &[String]) -> Self {
         // first keep `vocab` as a HashSet so that it only counts unique elements.
         let mut vocab = HashSet::new();
         for doc in documents.iter() {
@@ -45,7 +45,7 @@ impl TermDocCounts {
     }
 
     /// Prune stopwords out of the count matrix and the `vocab`.
-    fn prune_stopwords(&mut self, stopwords: &[String]) {
+    pub fn prune_stopwords(&mut self, stopwords: &[String]) {
         let mut new_vocab = Vec::new();
         let mut idxs = Vec::new();
 
@@ -64,7 +64,7 @@ impl TermDocCounts {
 
     /// Prune out tokens not present at least `min_count` times in all the documents
     /// taken together.
-    fn prune_min_count(&mut self, min_count: usize) {
+    pub fn prune_min_count(&mut self, min_count: usize) {
         let mut new_vocab = Vec::new();
         let mut idxs = Vec::new();
 
