@@ -7,11 +7,11 @@ use std::path::Path;
 /// Print out a matrix as a neatly formatted table, with labels along the rows
 /// and columns.
 /// `width` and `precision` are formatting attributes.
-trait PrintMatrix {
+pub trait PrintMatrix {
     fn print_matrix<T: Display>(
         &self,
-        row_labels: Vec<T>,
-        col_labels: Vec<T>,
+        row_labels: &Vec<T>,
+        col_labels: &Vec<T>,
         width: usize,
         precision: usize,
     ) -> Result<(), &str>;
@@ -21,8 +21,8 @@ trait PrintMatrix {
 impl PrintMatrix for Array<f64, Ix2> {
     fn print_matrix<T: Display>(
         &self,
-        row_labels: Vec<T>,
-        col_labels: Vec<T>,
+        row_labels: &Vec<T>,
+        col_labels: &Vec<T>,
         width: usize,
         precision: usize,
     ) -> Result<(), &str> {
@@ -54,10 +54,10 @@ impl PrintMatrix for Array<f64, Ix2> {
 
 /// Print out a set of vectors as a neatly formatted table, with labels along the rows.
 /// `width` and `precision` are formatting attributes.
-trait PrintVectors {
+pub trait PrintVectors {
     fn print_vectors<T: Display>(
         &self,
-        labels: Vec<T>,
+        labels: &Vec<T>,
         width: usize,
         precision: usize,
     ) -> Result<(), &str>;
@@ -67,16 +67,12 @@ trait PrintVectors {
 impl PrintVectors for Array<f64, Ix2> {
     fn print_vectors<T: Display>(
         &self,
-        labels: Vec<T>,
+        labels: &Vec<T>,
         width: usize,
         precision: usize,
     ) -> Result<(), &str> {
         if self.len_of(Axis(0)) != labels.len() {
             return Err("Number of rows in array do not match number of labels.");
-        }
-
-        for _ in 0..width + 1 {
-            print!(" ");
         }
 
         for (label, vec) in labels.iter().zip(self.genrows()) {
@@ -89,10 +85,10 @@ impl PrintVectors for Array<f64, Ix2> {
 
 /// Plot a set of vectors on a graph.
 /// Labels for the vectors may be optionally provided.
-trait PlotVectors {
+pub trait PlotVectors {
     fn plot_vectors<T: Display, P: AsRef<Path>>(
         &self,
-        labels: Vec<Option<T>>,
+        labels: &Vec<T>,
         save_file: &P,
     ) -> Result<(), &str>;
 }
@@ -101,7 +97,7 @@ trait PlotVectors {
 impl PlotVectors for Array<f32, Ix2> {
     fn plot_vectors<T: Display, P: AsRef<Path>>(
         &self,
-        labels: Vec<Option<T>>,
+        labels: &Vec<T>,
         save_file: &P,
     ) -> Result<(), &str> {
         if self.len_of(Axis(0)) != labels.len() {
@@ -128,12 +124,9 @@ impl PlotVectors for Array<f32, Ix2> {
             .apply_coord_spec(coord);
         root.fill(&WHITE).expect("Failed to fill figure.");
 
-        let plot_dot = |x: f32, y: f32| {
-            EmptyElement::at((x, y)) + Circle::new((0, 0), 3, ShapeStyle::from(&BLACK).filled())
-        };
-
-        let plot_dot_and_label = |x: f32, y: f32, label: T| {
-            plot_dot(x, y)
+        let plot_dot_and_label = |x: f32, y: f32, label: &T| {
+            EmptyElement::at((x, y))
+                + Circle::new((0, 0), 3, ShapeStyle::from(&BLACK).filled())
                 + Text::new(
                     format!("{}", label),
                     (10, 0),
@@ -148,11 +141,8 @@ impl PlotVectors for Array<f32, Ix2> {
             .zip(labels.into_iter())
         {
             let (x, y) = (vector[0], vector[1]);
-            match label {
-                Some(l) => root.draw(&plot_dot_and_label(x, y, l)),
-                None => root.draw(&plot_dot(x, y)),
-            }
-            .expect("Failed to draw on figure.");
+            root.draw(&plot_dot_and_label(x, y, label))
+                .expect("Failed to draw on figure.");
         }
 
         Ok(())
