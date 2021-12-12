@@ -31,7 +31,9 @@ fn text_example() {
     td_counts.prune_stopwords(&["a".into(), "and".into(), "of".into(), "the".into()]);
     td_counts.prune_min_count(2);
 
-    let doc_labels: Vec<String> = (1..=documents.len()).map(|i| format!("#{}", i.to_string())).collect();
+    let doc_labels: Vec<String> = (1..=documents.len())
+        .map(|i| format!("#{}", i.to_string()))
+        .collect();
     let count_matrix = td_counts.matrix.mapv(|v| v as f64);
 
     count_matrix
@@ -49,10 +51,12 @@ fn text_example() {
 
     term_vecs
         .mapv(|v| v as f32)
-        .plot_vectors(&td_counts.vocab, &"term_vecs.svg").unwrap();
+        .plot_vectors(&td_counts.vocab, &"term_vecs.svg")
+        .unwrap();
     doc_vecs
         .mapv(|v| v as f32)
-        .plot_vectors(&doc_labels, &"doc_vecs.svg").unwrap();
+        .plot_vectors(&doc_labels, &"doc_vecs.svg")
+        .unwrap();
 }
 
 fn main() {
