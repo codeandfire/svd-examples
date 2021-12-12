@@ -14,7 +14,9 @@ fn image_example() {
         let trunc_arr = u.dot(&s).dot(&vt);
         let trunc_arr = GrayPixelArray(trunc_arr.mapv(|v| v as u8));
         let trunc_img = GrayImage::from(trunc_arr);
-        trunc_img.save(format!("k_{}.png", k)).expect("Failed to save image.");
+        let filename = format!("k_{}.png", k);
+        trunc_img.save(&filename).expect("Failed to save image.");
+        println!("Image saved to {}", filename);
     }
 }
 
@@ -54,6 +56,6 @@ fn text_example() {
 }
 
 fn main() {
-    //image_example();
-    text_example();
+    image_example();
+    //text_example();
 }

@@ -86,7 +86,7 @@ impl PrintVectors for Array<f64, Ix2> {
 /// Plot a set of vectors on a graph.
 /// Labels for the vectors may be optionally provided.
 pub trait PlotVectors {
-    fn plot_vectors<T: Display, P: AsRef<Path>>(
+    fn plot_vectors<T: Display, P: AsRef<Path> + Display>(
         &self,
         labels: &Vec<T>,
         save_file: &P,
@@ -95,7 +95,7 @@ pub trait PlotVectors {
 
 /// Implementation of `PlotVectors` for a 32-bit floating-point 2-D array.
 impl PlotVectors for Array<f32, Ix2> {
-    fn plot_vectors<T: Display, P: AsRef<Path>>(
+    fn plot_vectors<T: Display, P: AsRef<Path> + Display>(
         &self,
         labels: &Vec<T>,
         save_file: &P,
@@ -144,6 +144,8 @@ impl PlotVectors for Array<f32, Ix2> {
             root.draw(&plot_dot_and_label(x, y, label))
                 .expect("Failed to draw on figure.");
         }
+
+        println!("Plot saved to {}", save_file);
 
         Ok(())
     }
