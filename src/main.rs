@@ -1,7 +1,39 @@
+use clap::{Parser, Subcommand};
 use image::io::Reader as ImageReader;
 use image::GrayImage;
 use std::fs;
 use svd_examples::*;
+
+#[derive(Parser)]
+struct Cli {
+    #[clap(subcommand)]
+    command: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    /// SVD applied to a sample image (adapted from https://github.com/Ramaseshanr/anlp/blob/master/SVDImage.ipynb)
+    Image {
+        /// start from `min_k` singular values
+        #[clap(long, default_value = "5")]
+        min_k: usize,
+
+        /// go up to (inclusive) `max_k` singular values
+        #[clap(long, default_value = "50")]
+        max_k: usize,
+
+        /// take singular values in steps of `step_k` between `min_k` and `max_k`
+        #[clap(long, default_value = "5")]
+        step_k: usize,
+    },
+
+    /// Latent Semantic Analysis (LSA) example from Deerwester et. al. (1990)
+    Text {
+        /// take `k` singular values; dimensionality of vectors will be `k`
+        #[clap(long, default_value = "2")]
+        dim_k: usize,
+    },
+}
 
 fn image_example(min_k: usize, max_k: usize, step_k: usize) {
     let img = ImageReader::open("face.png").unwrap().decode().unwrap();
@@ -20,7 +52,7 @@ fn image_example(min_k: usize, max_k: usize, step_k: usize) {
     }
 }
 
-fn text_example(k: usize) {
+fn text_example(dim_k: usize) {
     let documents: Vec<String> = fs::read_to_string("deerwester.txt")
         .expect("Failed to read file.")
         .trim()
@@ -42,14 +74,14 @@ fn text_example(k: usize) {
         .print_matrix(&doc_labels, &td_counts.vocab, 9, 0)
         .unwrap();
 
-    let (u, s, vt) = count_matrix.take_svd(k);
+    let (u, s, vt) = count_matrix.take_svd(dim_k);
     let term_vecs = u.dot(&s);
     let doc_vecs = (s.dot(&vt)).t().into_owned();
 
     term_vecs.print_vectors(&td_counts.vocab, 9, 4).unwrap();
     doc_vecs.print_vectors(&doc_labels, 7, 4).unwrap();
 
-    if k == 2 {
+    if dim_k == 2 {
         term_vecs
             .mapv(|v| v as f32)
             .plot_vectors(&td_counts.vocab, &"term_vecs.svg")
@@ -62,6 +94,14 @@ fn text_example(k: usize) {
 }
 
 fn main() {
-    image_example(5, 50, 5);
-    text_example(2);
+    let cli = Cli::parse();
+
+    match cli.command {
+        Command::Image {
+            min_k,
+            max_k,
+            step_k,
+        } => image_example(min_k, max_k, step_k),
+        Command::Text { dim_k } => text_example(dim_k),
+    }
 }
