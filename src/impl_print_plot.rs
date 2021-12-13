@@ -83,8 +83,7 @@ impl PrintVectors for Array<f64, Ix2> {
     }
 }
 
-/// Plot a set of vectors on a graph.
-/// Labels for the vectors may be optionally provided.
+/// Plot a set of vectors along with labels on a graph.
 pub trait PlotVectors {
     fn plot_vectors<T: Display, P: AsRef<Path> + Display>(
         &self,
