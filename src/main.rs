@@ -68,28 +68,36 @@ fn text_example(dim_k: usize) {
         .collect();
     let count_matrix = td_counts.matrix.mapv(|v| v as f64);
 
-    count_matrix
-        .t()
-        .into_owned()
-        .print_matrix(&doc_labels, &td_counts.vocab, 9, 0)
-        .unwrap();
+    print_matrix(
+        &count_matrix.t().into_owned(),
+        &doc_labels,
+        &td_counts.vocab,
+        9,
+        0,
+    )
+    .unwrap();
 
     let (u, s, vt) = count_matrix.take_svd(dim_k);
     let term_vecs = u.dot(&s);
     let doc_vecs = (s.dot(&vt)).t().into_owned();
 
-    term_vecs.print_vectors(&td_counts.vocab, 9, 4).unwrap();
-    doc_vecs.print_vectors(&doc_labels, 7, 4).unwrap();
+    print_vectors(&term_vecs, &td_counts.vocab, 9, 4).unwrap();
+    print_vectors(&doc_vecs, &doc_labels, 7, 4).unwrap();
 
     if dim_k == 2 {
-        term_vecs
-            .mapv(|v| v as f32)
-            .plot_vectors(&td_counts.vocab, &"term_vecs.svg")
-            .unwrap();
-        doc_vecs
-            .mapv(|v| v as f32)
-            .plot_vectors(&doc_labels, &"doc_vecs.svg")
-            .unwrap();
+        plot_vectors(
+            &term_vecs.mapv(|v| v as f32),
+            &td_counts.vocab,
+            "term_vecs.svg",
+        )
+        .unwrap();
+
+        plot_vectors(
+            &doc_vecs.mapv(|v| v as f32),
+            &doc_labels,
+            "doc_vecs.svg",
+        )
+        .unwrap();
     }
 }
 
