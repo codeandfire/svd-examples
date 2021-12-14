@@ -10,8 +10,8 @@ use std::path::Path;
 pub trait PrintMatrix {
     fn print_matrix<T: Display>(
         &self,
-        row_labels: &Vec<T>,
-        col_labels: &Vec<T>,
+        row_labels: &[T],
+        col_labels: &[T],
         width: usize,
         precision: usize,
     ) -> Result<(), &str>;
@@ -21,8 +21,8 @@ pub trait PrintMatrix {
 impl PrintMatrix for Array<f64, Ix2> {
     fn print_matrix<T: Display>(
         &self,
-        row_labels: &Vec<T>,
-        col_labels: &Vec<T>,
+        row_labels: &[T],
+        col_labels: &[T],
         width: usize,
         precision: usize,
     ) -> Result<(), &str> {
@@ -57,7 +57,7 @@ impl PrintMatrix for Array<f64, Ix2> {
 pub trait PrintVectors {
     fn print_vectors<T: Display>(
         &self,
-        labels: &Vec<T>,
+        labels: &[T],
         width: usize,
         precision: usize,
     ) -> Result<(), &str>;
@@ -67,7 +67,7 @@ pub trait PrintVectors {
 impl PrintVectors for Array<f64, Ix2> {
     fn print_vectors<T: Display>(
         &self,
-        labels: &Vec<T>,
+        labels: &[T],
         width: usize,
         precision: usize,
     ) -> Result<(), &str> {
@@ -87,7 +87,7 @@ impl PrintVectors for Array<f64, Ix2> {
 pub trait PlotVectors {
     fn plot_vectors<T: Display, P: AsRef<Path> + Display>(
         &self,
-        labels: &Vec<T>,
+        labels: &[T],
         save_file: &P,
     ) -> Result<(), &str>;
 }
@@ -96,7 +96,7 @@ pub trait PlotVectors {
 impl PlotVectors for Array<f32, Ix2> {
     fn plot_vectors<T: Display, P: AsRef<Path> + Display>(
         &self,
-        labels: &Vec<T>,
+        labels: &[T],
         save_file: &P,
     ) -> Result<(), &str> {
         if self.len_of(Axis(0)) != labels.len() {
@@ -137,7 +137,7 @@ impl PlotVectors for Array<f32, Ix2> {
             .genrows()
             .into_iter()
             .map(|row| row.to_vec())
-            .zip(labels.into_iter())
+            .zip(labels.iter())
         {
             let (x, y) = (vector[0], vector[1]);
             root.draw(&plot_dot_and_label(x, y, label))

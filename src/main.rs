@@ -56,7 +56,7 @@ fn text_example(dim_k: usize) {
     let documents: Vec<String> = fs::read_to_string("deerwester.txt")
         .expect("Failed to read file.")
         .trim()
-        .split("\n")
+        .split('\n')
         .map(|s| s.into())
         .collect();
     let mut td_counts = TermDocCounts::from_documents(&documents);
