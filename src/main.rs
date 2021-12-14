@@ -92,12 +92,7 @@ fn text_example(dim_k: usize) {
         )
         .unwrap();
 
-        plot_vectors(
-            &doc_vecs.mapv(|v| v as f32),
-            &doc_labels,
-            "doc_vecs.svg",
-        )
-        .unwrap();
+        plot_vectors(&doc_vecs.mapv(|v| v as f32), &doc_labels, "doc_vecs.svg").unwrap();
     }
 }
 

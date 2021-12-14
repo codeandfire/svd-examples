@@ -12,7 +12,7 @@ pub fn print_matrix<T: Display>(
     row_labels: &[T],
     col_labels: &[T],
     width: usize,
-    precision: usize
+    precision: usize,
 ) -> Result<(), &'static str> {
     if (row_labels.len(), col_labels.len()) != matrix.dim() {
         return Err("Dimensions of array do not match number of row and/or column labels.");
@@ -59,9 +59,14 @@ pub fn print_vectors<T: Display>(
 }
 
 /// Plot a set of vectors along with labels on a graph.
-pub fn plot_vectors<T, P>(vectors: &Array<f32, Ix2>, labels: &[T], save_file: P) -> Result<(), &'static str>
-where T: Display,
-      P: AsRef<Path> + Display
+pub fn plot_vectors<T, P>(
+    vectors: &Array<f32, Ix2>,
+    labels: &[T],
+    save_file: P,
+) -> Result<(), &'static str>
+where
+    T: Display,
+    P: AsRef<Path> + Display,
 {
     if vectors.len_of(Axis(0)) != labels.len() {
         return Err("Number of rows in array do not match number of labels.");
