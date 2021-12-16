@@ -67,11 +67,16 @@ impl From<GrayPixelArray> for GrayImage {
 }
 
 /// Bag-of-Words representation of a document.
+/// The `HashMap` is a mapping from a token to the count, i.e. the number of times
+/// it occurs in the document.
 struct Document(pub HashMap<String, usize>);
 
+/// Use simple whitespace tokenization to construct a `Document` representation from a `String`.
 impl From<String> for Document {
     fn from(text: String) -> Self {
         let mut counts = HashMap::new();
+
+        // whitespace tokenization
         for token in text.split_whitespace() {
 
             // need to use `String::from(token)` instead of `token` because
@@ -86,20 +91,26 @@ impl From<String> for Document {
     }
 }
 
+/// A representation of a document corpus.
+/// Contains a `Vec` of individual documents as well as a vocabulary `vocab`.
 struct Corpus {
     docs: Vec<Document>,
     pub vocab: Vec<String>,
 }
 
+/// Construct a `Corpus` representation from a `Vec` of `Documents`.
 impl From<Vec<Document>> for Corpus {
     fn from(docs: Vec<Document>) -> Self {
+        // the `vocab` is initially a `HashSet` so that it records only unique elements.
         let mut vocab = HashSet::new();
+
         for doc in docs.iter() {
             for token in doc.0.keys() {
                 vocab.insert(token.clone());
             }
         }
 
+        // collect the `vocab` in a `Vec` and sort.
         let mut vocab: Vec<String> = Vec::from_iter(vocab.into_iter());
         vocab.sort();
 
@@ -108,7 +119,8 @@ impl From<Vec<Document>> for Corpus {
 }
 
 impl Corpus {
-    fn prune_stopwords(self, stopwords: &[String]) -> Self {
+    /// Prune out stopwords from the vocabulary of the `Corpus`.
+    fn prune_stopwords(self, stopwords: Vec<String>) -> Self {
         let new_vocab: Vec<String> = self.vocab
             .into_iter()
             .filter(|token| !stopwords.contains(token))
@@ -117,12 +129,16 @@ impl Corpus {
         Corpus { docs: self.docs, vocab: new_vocab }
     }
 
+    /// Prune out words from the vocabulary of the `Corpus` that do not satisfy a
+    /// minimum count threshold, i.e. that do not occur at least `min_count` number
+    /// of times in all of the documents taken together.
     fn prune_min_count(self, min_count: usize) -> Self {
         let new_vocab: Vec<String> = self.vocab
             .into_iter()
             .filter(|token| {
                 let mut count = 0;
                 for doc in self.docs.iter() {
+                    // number of times `token` occurs in `doc`.
                     count += *doc.0.get(token).unwrap_or(&0);
                 }
 
@@ -133,12 +149,15 @@ impl Corpus {
         Corpus { docs: self.docs, vocab: new_vocab }
     }
 
+    /// Construct a count matrix from the `Corpus`.
     fn to_count_matrix(&self) -> Array<usize, Ix2> {
         let mut matr: Array<usize, Ix2> = Array::default((self.vocab.len(), self.docs.len()));
 
         for (j, doc) in self.docs.iter().enumerate() {
             for (i, token) in self.vocab.iter().enumerate() {
                 let elem = matr.get_mut((i, j)).unwrap();
+
+                // number of times `token` occurs in `doc`.
                 *elem = *doc.0.get(token).unwrap_or(&0);
             }
         }
