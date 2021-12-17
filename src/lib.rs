@@ -166,6 +166,11 @@ impl Corpus {
     }
 }
 
+enum Feature {
+    Continuous(f64),
+    Categorical(usize),
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -248,7 +253,7 @@ mod tests {
             ImageBuffer::from_vec(width as u32, height as u32, vec_rep.clone()).unwrap();
         let arr_rep = GrayPixelArray(Array::from_shape_vec((height, width), vec_rep).unwrap());
 
-        assert_eq!(GrayPixelArray::from(img_rep as GrayImage), arr_rep);
+        assert_eq!(GrayPixelArray::from(img_rep), arr_rep);
     }
 
     #[test]
@@ -261,7 +266,7 @@ mod tests {
             ImageBuffer::from_vec(width as u32, height as u32, vec_rep.clone()).unwrap();
         let arr_rep = GrayPixelArray(Array::from_shape_vec((height, width), vec_rep).unwrap());
 
-        assert_eq!(GrayImage::from(arr_rep as GrayPixelArray), img_rep);
+        assert_eq!(GrayImage::from(arr_rep), img_rep);
     }
 
     #[test]
@@ -322,7 +327,7 @@ mod tests {
             Document::from("c c d d a e e e e e".to_string()),
             Document::from("a a b d c a".to_string()),
         ])
-        .prune_stopwords(&["a".to_string(), "e".to_string()]);
+        .prune_stopwords(vec!["a".to_string(), "e".to_string()]);
 
         let corpus2 = Corpus::from(vec![
             Document::from("b c d".to_string()),
@@ -342,7 +347,7 @@ mod tests {
             Document::from("b c c c c a".to_string()),
             Document::from("a d".to_string()),
         ])
-        .prune_stopwords(&["e".to_string()]);   // no Err, Result etc.
+        .prune_stopwords(vec!["e".to_string()]);   // no Err, Result etc.
     }
 
     #[test]
