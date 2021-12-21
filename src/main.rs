@@ -53,46 +53,54 @@ fn image_example(min_k: usize, max_k: usize, step_k: usize) {
 }
 
 fn text_example(dim_k: usize) {
-    let documents: Vec<String> = fs::read_to_string("deerwester.txt")
+    let corpus: Vec<Document> = fs::read_to_string("deerwester.txt")
+        .expect("Failed to read file.")
+        .trim()
+        .split('\n')
+        .map(|s| Document::from(s.to_string()))
+        .collect();
+
+    let doc_labels: Vec<String> = (1..=corpus.len())
+        .map(|i| format!("#{}", i.to_string()))
+        .collect();
+
+    let stopwords: Vec<String> = fs::read_to_string("stopwords.txt")
         .expect("Failed to read file.")
         .trim()
         .split('\n')
         .map(|s| s.into())
         .collect();
-    let mut td_counts = TermDocCounts::from_documents(&documents);
-    td_counts.prune_stopwords(&["a".into(), "and".into(), "of".into(), "the".into()]);
-    td_counts.prune_min_count(2);
 
-    let doc_labels: Vec<String> = (1..=documents.len())
-        .map(|i| format!("#{}", i.to_string()))
-        .collect();
-    let count_matrix = td_counts.matrix.mapv(|v| v as f64);
+    let corpus = Corpus::from(corpus).prune_stopwords(stopwords).prune_min_count(2);
+    let count_matr = corpus.to_count_matrix().mapv(|v| v as f64);
 
     print_matrix(
-        &count_matrix.t().into_owned(),
+        &count_matr.t().into_owned(),
         &doc_labels,
-        &td_counts.vocab,
+        &corpus.vocab,
         9,
         0,
     )
     .unwrap();
 
-    let (u, s, vt) = count_matrix.take_svd(dim_k);
+    let (u, s, vt) = count_matr.take_svd(dim_k);
     let term_vecs = u.dot(&s);
     let doc_vecs = (s.dot(&vt)).t().into_owned();
 
-    print_vectors(&term_vecs, &td_counts.vocab, 9, 4).unwrap();
+    print_vectors(&term_vecs, &corpus.vocab, 9, 4).unwrap();
     print_vectors(&doc_vecs, &doc_labels, 7, 4).unwrap();
 
     if dim_k == 2 {
         plot_vectors(
             &term_vecs.mapv(|v| v as f32),
-            &td_counts.vocab,
+            &corpus.vocab,
             "term_vecs.svg",
         )
         .unwrap();
 
         plot_vectors(&doc_vecs.mapv(|v| v as f32), &doc_labels, "doc_vecs.svg").unwrap();
+    } else {
+        println!("Skipping plots because vectors are not 2-dimensional.");
     }
 }
 
