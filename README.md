@@ -28,3 +28,8 @@ To change the `k` values used, take a look at the help text again:
 ```
 $ cargo run -- image --help
 ```
+
+To run tests, please use:
+```
+$ cargo test
+```
