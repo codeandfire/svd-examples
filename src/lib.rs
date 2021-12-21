@@ -69,7 +69,7 @@ impl From<GrayPixelArray> for GrayImage {
 /// Bag-of-Words representation of a document.
 /// The `HashMap` is a mapping from a token to the count, i.e. the number of times
 /// it occurs in the document.
-struct Document(pub HashMap<String, usize>);
+pub struct Document(pub HashMap<String, usize>);
 
 /// Use simple whitespace tokenization to construct a `Document` representation from a `String`.
 impl From<String> for Document {
@@ -93,7 +93,7 @@ impl From<String> for Document {
 
 /// A representation of a document corpus.
 /// Contains a `Vec` of individual documents as well as a vocabulary `vocab`.
-struct Corpus {
+pub struct Corpus {
     docs: Vec<Document>,
     pub vocab: Vec<String>,
 }
@@ -120,7 +120,7 @@ impl From<Vec<Document>> for Corpus {
 
 impl Corpus {
     /// Prune out stopwords from the vocabulary of the `Corpus`.
-    fn prune_stopwords(self, stopwords: Vec<String>) -> Self {
+    pub fn prune_stopwords(self, stopwords: Vec<String>) -> Self {
         let new_vocab: Vec<String> = self.vocab
             .into_iter()
             .filter(|token| !stopwords.contains(token))
@@ -132,7 +132,7 @@ impl Corpus {
     /// Prune out words from the vocabulary of the `Corpus` that do not satisfy a
     /// minimum count threshold, i.e. that do not occur at least `min_count` number
     /// of times in all of the documents taken together.
-    fn prune_min_count(self, min_count: usize) -> Self {
+    pub fn prune_min_count(self, min_count: usize) -> Self {
         let new_vocab: Vec<String> = self.vocab
             .into_iter()
             .filter(|token| {
@@ -150,7 +150,7 @@ impl Corpus {
     }
 
     /// Construct a count matrix from the `Corpus`.
-    fn to_count_matrix(&self) -> Array<usize, Ix2> {
+    pub fn to_count_matrix(&self) -> Array<usize, Ix2> {
         let mut matr: Array<usize, Ix2> = Array::default((self.vocab.len(), self.docs.len()));
 
         for (j, doc) in self.docs.iter().enumerate() {
@@ -166,10 +166,8 @@ impl Corpus {
     }
 }
 
-enum Feature {
-    Continuous(f64),
-    Categorical(usize),
-}
+mod print_plot;
+pub use crate::print_plot::*;
 
 #[cfg(test)]
 mod tests {
