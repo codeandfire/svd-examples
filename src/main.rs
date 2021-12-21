@@ -71,7 +71,9 @@ fn text_example(dim_k: usize) {
         .map(|s| s.into())
         .collect();
 
-    let corpus = Corpus::from(corpus).prune_stopwords(stopwords).prune_min_count(2);
+    let corpus = Corpus::from(corpus)
+        .prune_stopwords(stopwords)
+        .prune_min_count(2);
     let count_matr = corpus.to_count_matrix().mapv(|v| v as f64);
 
     print_matrix(

@@ -78,7 +78,6 @@ impl From<String> for Document {
 
         // whitespace tokenization
         for token in text.split_whitespace() {
-
             // need to use `String::from(token)` instead of `token` because
             // `token` is a string slice - a reference to a slice of `text` -
             // and `text` is freed at the end of this function, so the Rust
@@ -121,19 +120,24 @@ impl From<Vec<Document>> for Corpus {
 impl Corpus {
     /// Prune out stopwords from the vocabulary of the `Corpus`.
     pub fn prune_stopwords(self, stopwords: Vec<String>) -> Self {
-        let new_vocab: Vec<String> = self.vocab
+        let new_vocab: Vec<String> = self
+            .vocab
             .into_iter()
             .filter(|token| !stopwords.contains(token))
             .collect();
 
-        Corpus { docs: self.docs, vocab: new_vocab }
+        Corpus {
+            docs: self.docs,
+            vocab: new_vocab,
+        }
     }
 
     /// Prune out words from the vocabulary of the `Corpus` that do not satisfy a
     /// minimum count threshold, i.e. that do not occur at least `min_count` number
     /// of times in all of the documents taken together.
     pub fn prune_min_count(self, min_count: usize) -> Self {
-        let new_vocab: Vec<String> = self.vocab
+        let new_vocab: Vec<String> = self
+            .vocab
             .into_iter()
             .filter(|token| {
                 let mut count = 0;
@@ -146,7 +150,10 @@ impl Corpus {
             })
             .collect();
 
-        Corpus { docs: self.docs, vocab: new_vocab }
+        Corpus {
+            docs: self.docs,
+            vocab: new_vocab,
+        }
     }
 
     /// Construct a count matrix from the `Corpus`.
@@ -313,7 +320,12 @@ mod tests {
         assert_eq!(corpus.vocab, ["a", "b", "c", "d"]);
         assert_eq!(
             corpus.to_count_matrix(),
-            array![[0, 0, 2, 1, 1], [0, 0, 1, 1, 0], [0, 0, 1, 4, 0], [0, 0, 0, 0, 1]]
+            array![
+                [0, 0, 2, 1, 1],
+                [0, 0, 1, 1, 0],
+                [0, 0, 1, 4, 0],
+                [0, 0, 0, 0, 1]
+            ]
         );
     }
 
@@ -345,7 +357,7 @@ mod tests {
             Document::from("b c c c c a".to_string()),
             Document::from("a d".to_string()),
         ])
-        .prune_stopwords(vec!["e".to_string()]);   // no Err, Result etc.
+        .prune_stopwords(vec!["e".to_string()]); // no Err, Result etc.
     }
 
     #[test]
@@ -360,7 +372,7 @@ mod tests {
         let corpus2 = Corpus::from(vec![
             Document::from("a a a d d".to_string()),
             Document::from("d d c e c a".to_string()),
-            Document::from("c e e".to_string())
+            Document::from("c e e".to_string()),
         ]);
 
         assert_eq!(corpus1.vocab, corpus2.vocab);
